@@ -1,0 +1,68 @@
+
+background no
+out_to_console yes
+out_to_x no
+#use_xft yes
+use_spacer none
+#xftfont ubuntu:size=10
+#xftalpha 1
+update_interval 1.0
+total_run_times 0
+#own_window yes
+#own_window_transparent yes
+#own_window_type desktop
+#own_window_hints undecorated,below,sticky,skip_taskbar,skip_pager
+#double_buffer yes
+#minimum_size 200 50
+#maximum_width 240
+draw_shades no
+draw_outline no
+draw_borders no
+draw_graph_borders no
+default_color green #gray
+default_shade_color 000000
+default_outline_color d9d7d6
+#alignment tr
+#gap_x 800
+#gap_y 12
+#no_buffers yes
+#uppercase no
+cpu_avg_samples 2
+override_utf8_locale no
+##############################################
+#  Output
+##############################################
+TEXT
+#$mpd_smart :: ${cpu cpu1}% / ${cpu cpu2}%  ${loadavg 1} ${loadavg 2 3} :: ${acpitemp}c :: $memperc% ($mem) :: ${downspeed eth0}K/s ${upspeed eth0}K/s :: ${time %a %b %d %I:%M%P}
+
+#检测CPU的温度等需要安装 #pacman -S lm_sensors 可参考：http://blog.sina.com.cn/s/blog_4b0d430a0100n3nw.html
+
+#检测硬盘的温度需要安装hddtemp程序，并将温度剪切出来，硬盘不同剪切的位置不同，可在终端里面执行sudo hddtemp /dev/sda以确定位置。
+
+#判断在这里进行,其中颜色的定义在config.h里面
+#${hwmon 0 temp 1}°	内存温度
+#${hwmon 0 temp 2}°	CPU温度
+#${hwmon 0 fan 2}RPM	CPU风扇转速	
+
+[${if_match "${downspeed eth0}">"0B"}${exec echo -e "\\#00ff00\\"}${else}${exec echo -e "\\#ffffff\\"}${endif}↓${downspeed eth0}${if_match "${upspeed eth0}">"0B"}${exec echo -e "\\#00ffff\\"}${else}${exec echo -e "\\#ffffff\\"}${endif}↑${upspeed eth0} ${exec echo -e "\\#ffffff\\"}]\
+[${if_match ${cpu cpu0}>=60}${exec echo -e "\006"}${endif}${if_match ${cpu cpu0}>=85}${exec echo -e "\\#ff0000\\"}${endif}${cpu cpu0}% ${hwmon 0 temp 2}° ${hwmon 0 fan 2}RPM${exec echo -e "\\#ffffff\\"}]\
+[${if_match ${memperc}>=80}${exec echo -e "\006"}${endif}${membar}$mem ${exec echo -e "\001"}${hwmon 0 temp 1}°]\
+[HD${exec hddtemp /dev/sda | cut -c30-34}]\
+[${exec echo -e "\\#ccffcc\\"}${if_existing /sys/class/power_supply/BAT1/present}Bat ${battery_percent BAT1}% ${battery_time BAT1}${else}AC${endif}${exec echo -e "\\#ffffff\\"}]\
+${exec echo -e "\\#ffffff\\"}[${exec echo -e "\\#00ff00\\"}${time %d %a %H:%M}]\
+${exec echo -e "\\#ffffff\\"}[${mixer}${exec echo -e "\\#ffffff\\"}]
+
+
+#备份，实现温度和风扇转速的方式不同
+#[${if_match "${downspeed eth0}">"0B"}${exec echo -e "\005"}${else}${exec echo -e "\001"}${endif}↓${downspeed eth0}${if_match "${upspeed eth0}">"0B"}${exec echo -e "\007"}${else}${exec echo -e "\001"}${endif}↑${upspeed eth0}${exec echo -e "\001"}]\
+#[${if_match ${cpu cpu0}>=60}${exec echo -e "\006"}${endif}${if_match ${cpu cpu0}>=85}${exec echo -e "\003"}${endif}${cpu cpu0}% ${execi 6 /usr/bin/sensors | grep temp\2| paste -s | cut -c15-21} ${execi 6 /usr/bin/sensors | grep fan2| paste -s | cut -c13-20}${exec echo -e "\001"}]\
+#[${if_match ${memperc}>=80}${exec echo -e "\006"}${endif}${membar}$mem ${exec echo -e "\001"}${execi 6 /usr/bin/sensors | grep temp\1| paste -s | cut -c15-21} HD${exec hddtemp /dev/sda | cut -c30-35}]\
+#[${exec echo -e "\005"}${if_existing /sys/class/power_supply/BAT1/present}Bat ${battery_percent BAT1}% ${battery_time BAT1}${else}AC${endif}${exec echo -e "\001"}]\
+#${exec echo -e "\001"}[${exec echo -e "\005"}${time %d %a %H:%M} ${exec echo -e "\001"}${mixer}${exec echo -e "\001"}]
+
+#${time %d %a %H:%M}
+#Uptime:$alignr$uptime
+#RAM:$alignr$mem/$memmax
+#Swap usage:$alignr$swap/$swapmax
+#CPU usage:$alignr${cpu cpu0}%
+
