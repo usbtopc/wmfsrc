@@ -1,0 +1,5 @@
+wmfsrc:wmfs配置文件。
+
+conkyrc：conky配置文件，和wmfsrc放到同一个地方（~/.config/wmfs）。
+
+wmfs.png：wmfs的屏幕截图。
